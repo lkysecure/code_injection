@@ -25,11 +25,11 @@ static int check_arg(const char *filename)
 	else if (f_ident[EI_CLASS] != ELFCLASS64)
 		write_error(filename, FORMAT_ERR);
 
-	// check i ffile type is executable
+	// check if file type is executable
 	else if (elf->e_type != ET_EXEC && elf->e_type != ET_DYN)
 		write_error(filename, ELFEXEC_ERR);
 
-	else // do the thing
+	else
 	{
 		// Code Injection 수행
 		err = ci_elf64(&context);

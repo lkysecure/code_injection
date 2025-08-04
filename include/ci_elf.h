@@ -22,7 +22,6 @@
 typedef struct s_ci
 {
 	const char	*param_name;
-	int8_t		keyisparam;
 	char 		*key;
 	void		*base;
 	uint64_t	size;

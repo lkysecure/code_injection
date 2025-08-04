@@ -37,22 +37,6 @@ static uint64_t g_parasite_size = 0;
 static uint64_t g_decryptor_size = 0;
 static uint64_t g_total_payload_size = 0;
 
-static int check_boundaries(const t_ci *context)
-{
-	Elf64_Ehdr *elf = (Elf64_Ehdr *)context->base;
-
-	// ELF 파일의 각 Program Segment와 Section 정보의 유효성 검사
-	if ((elf->e_shoff + (sizeof(Elf64_Shdr) * elf->e_shnum) > context->size)
-		|| (elf->e_phoff + (sizeof(Elf64_Phdr) * elf->e_phnum) > context->size)
-		|| ((elf->e_phentsize * elf->e_phnum) > (sizeof(Elf64_Phdr) * elf->e_phnum))
-		|| ((elf->e_shentsize * elf->e_shnum) > (sizeof(Elf64_Shdr) * elf->e_shnum))
-		|| (elf->e_ehsize > sizeof(Elf64_Ehdr))
-	)
-		return 1;
-
-	return 0;
-}
-
 static void set_payload_values(Elf64_Off beginoff, Elf64_Addr beginaddr)
 {
 	g_parasite_off = beginoff;
@@ -127,13 +111,9 @@ static uint8_t not_injectable(Elf64_Ehdr *elf)
 
 int ci_elf64(t_ci *context)
 {
-	// 타겟 ELF 파일 boundary 유효성 검사
-	if (check_boundaries(context))
-		return write_error(context->param_name, CORRUPT_ERR);
-
 	// rc4에서 생성할 암호키 생성 (urandom 기반)
 	context->key = generate_key(URANDOM, DFLT_KEY_LEN);
-	if (!context->keyisparam && !context->key)
+	if (!context->key)
 		return 1;
 
 	// handler binary 로드
@@ -184,10 +164,6 @@ int ci_elf64(t_ci *context)
 		free_payloads(context->key, handler, parasite, decryptor);
 		return write_error(PATCH, NULL);
 	}
-
-	// time to print the key
-	if (!context->keyisparam)
-		print_key(context->key, DFLT_KEY_LEN);
 
 	// set entrypoint to start of payload
 	Elf64_Addr code_entry = elf->e_entry;
